@@ -1,0 +1,33 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        username: nacos
+        password: nacos
+  application:
+    name: res-security
+  redis:
+    host: localhost
+    port: 6379
+    database: 2
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/yc119res?serverTimeZone=UTC
+    #使用druid数据源
+    type: com.alibaba.druid.pool.DruidDataSource
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  #打印mybatis-plus的sql语句
+
+logging:
+  level:
+    root: debug
+    com.yc: debug
+    org.springframework: debug
+
+server:
+  port: 7777

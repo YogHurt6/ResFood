@@ -1,0 +1,28 @@
+server:
+  port: 6666
+spring:
+  cloud:
+    inetutils:
+      ignored-interfaces: 'VMware Virtual Ethernet Adapter for VMnet1,VMware Virtual Ethernet Adapter for VMnet8'
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        username: nacos
+        password: nacos
+  application:
+    name: res-index
+  web:
+    resources:
+      static-locations: [classpath:/public/,classpath:/resources/,classpath:/META-INF/resources/,classpath:/static/]
+logging:
+  level:
+    root: info
+    com.yc: info
+    org.springframework.web: info
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: ""

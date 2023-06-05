@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/../../MavenRepository/org/springframework/boot/spring-boot-starter-parent/2.7.0/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/res-api/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/res-entity/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/res-entity/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/res-food/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/res-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/res-index/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/res-order/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/res-security/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test_Responsibility_Chain_Design_Pattern/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test_predicate/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test_state_mode_Design_Pattern/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test_template_Design_Pattern/src/main/java" charset="UTF-8" />
+  </component>
+</project>

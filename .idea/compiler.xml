@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="res-gateway" />
+        <module name="res-index" />
+        <module name="test_template_Design_Pattern" />
+        <module name="res-entity" />
+        <module name="res-order" />
+        <module name="res-api" />
+        <module name="res-food" />
+        <module name="res-security" />
+        <module name="test_predicate" />
+        <module name="test_state_mode_Design_Pattern" />
+        <module name="test_Responsibility_Chain_Design_Pattern" />
+        <module name="test_feign" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="res-api" options="-parameters" />
+      <module name="res-entity" options="-parameters" />
+      <module name="res-food" options="-parameters" />
+      <module name="res-gateway" options="-parameters" />
+      <module name="res-index" options="-parameters" />
+      <module name="res-order" options="-parameters" />
+      <module name="res-security" options="-parameters" />
+      <module name="test_Responsibility_Chain_Design_Pattern" options="-parameters" />
+      <module name="test_predicate" options="-parameters" />
+      <module name="test_state_mode_Design_Pattern" options="-parameters" />
+      <module name="test_template_Design_Pattern" options="-parameters" />
+    </option>
+  </component>
+</project>

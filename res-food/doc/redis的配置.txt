@@ -1,0 +1,17 @@
+首先是安装redis-server。
+sudo apt-get install redis-server
+
+1. 然后修改配置文件。
+   vim /etc/redis/redis.conf
+
+    将其中的两项修改。
+             输入字母i, 表示插入模式，才能改写以下的内容
+
+      (1)  找到bind 127.0.0.1 ::1，把这行前面加个#注释掉
+      (2)  再查找protected-mode yes 把yes修改为no             以上两个操作允许用户从本机访问远程的阿里云
+      (3)  同时将requirepass foobared取消注释#，改为自己的密码
+
+2.重启服务:
+   systemctl restart redis-server.service
+
+3. 在阿里云中要打开 6379的端口  加到安全组.

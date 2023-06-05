@@ -1,0 +1,75 @@
+server:
+  port: 20001
+
+spring:
+  application:
+    name: res-gateway
+  cloud:
+    inetutils:
+      ignored-interfaces: 'VMware Virtual Ethernet Adapter for VMnet1,VMware Virtual Ethernet Adapter for VMnet8'
+    gateway:  #基础的路由转发配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+#            allowCredentials: true
+      routes:   #查看配置源码
+        - id: res-order
+          uri: lb://res-order
+          predicates:
+            - Path=/resorder/**
+          filters:
+            - RewritePath=/resorder/(?<segment>.*), /$\{segment}
+        - id: res-security
+          uri: lb://res-security
+          predicates:
+            - Path=/ressecurity/**
+          filters:
+            - RewritePath=/ressecurity/(?<segment>.*), /$\{segment}
+        - id: res-index
+          #uri: http://localhost:6666
+          uri: lb://res-index
+          predicates:
+            - Path=/resindex/**
+          filters:
+            - RewritePath=/resindex/(?<segment>.*), /$\{segment}    #  /index.html
+            #- Method=GET,POST
+        - id: res-food
+          #uri: http://localhost:9999
+          uri: lb://res-food
+          predicates:
+           # - Path=/resfood/**
+#            - After=2023-04-17T22:15:47.789-07:00[Asia/Shanghai]
+            - ServiceTimeBetween=上午04:22,下午11:00
+#        - id: baidu #唯一区别的名字  不写会随机给一个
+#          uri: http://www.baidu.com  #都转发到百度
+#          predicates:
+#            #PathRoutePredicateFactory => PathRoutePredicate  断言
+#            - Path=/**  #表示访问 此网站所有的路径都要  路由到 uri为  baidu的地址
+#            # http://localhost:20001/
+#            # http://www.baidu.com/abc  百度没有此资源 返回404
+          filters:
+            #- AddRequestHeader=token,123
+            - MyTime=秒
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        username: nacos
+        password: nacos
+        #namespace: prod
+logging:
+  level:
+    root: debug
+    com.yc: debug
+    org.springframework.cloud.gateway: debug
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"    # 暴露gateway端点，* 是暴露全部端点
+  endpoint:
+    gateway:
+      enabled: true # default value
+

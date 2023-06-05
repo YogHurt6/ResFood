@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>小萌神订餐网</title>
+    <!-- 图标 -->
+    <link rel="short icon" href="image/eat0.ico" />
+    <link rel="stylesheet" href="css/index.css" />
+</head>
+<body>
+yh的实验版本....
+<div id="app">
+
+    <div class="head">
+        小萌神订餐网
+        <div class="right">
+            <span class="showlogin" id="showlogin" @click="loginflag=!loginflag" v-if="!isLogin">登录</span>
+            <span id="exitspan" v-if="isLogin">
+                欢迎您:{{username}}  <a @click.prevent="historyflag=!historyflag" >历史</a> | <a href="" @click.prevent="logout()"  >退出</a>
+            </span>
+        </div>
+    </div>
+
+    <div class="content">
+        <ul class="allfoods" id="allfoods">
+
+            <li v-for="(item,index) in data">
+                <h3  @click="showFood( item.fid  )">{{item.fname}}</h3>
+                <div :id=`fid_${item.fid}` class="fooddesc" v-show="item.status">
+                    <img :src=`image/${item.fphoto}` class="foodimg" />
+                    <article class="foodprice">
+                        <p>菜品描述：{{item.detail}}</p>
+                        <p class="normalprice">原价：￥{{item.normprice}}</p>
+                        <p class="realprice">特价：￥{{item.realprice}}</p>
+                        <p class="buybtn" @click="addCart(item.fid,1)" >加入购物车</p>
+                        <p>赞{{item.praise}}<span v-if="isLogin" @click="clickPraise(  item.fid ,index )">来一发</span></p>
+                    </article>
+
+                </div>
+            </li>
+        </ul>
+
+        <div style="background-color: white;color:red">
+            <a  @click.prevent="clickPage( 1   )">第一页</a>
+            <a  @click.prevent="clickPage(   pagebean.pre  )"  :page-data="pagebean.pre">上一页     {{pagebean.pre}}</a>
+            <a  @click.prevent="clickPage(  pagebean.next )"  :page-data="pagebean.next" >下一页       {{pagebean.next}}</a>
+            <a  @click.prevent="clickPage( pagebean.totalpages )" :page-data="pagebean.totalpages">最后一页 {{pagebean.totalpages}}  </a>
+            总共条{{pagebean.total}}记录/共分{{pagebean.totalpages}}页,
+            每页{{pagebean.pagesize}}条,当前第{{pagebean.pageno}}页
+            <br />
+            按<select name="sortby" v-model="pagebean.sortby">
+                   <option value="fid" >菜品编号</option>
+                    <option value="realprice">成交价格</option>
+              </select>
+            <select name="sort" v-model="pagebean.sort">
+                <option value="asc" >升序</option>
+                <option value="desc">降序</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="look" v-if="historyflag">
+        <span @click="getHistory()">浏览记录(点我刷新)</span>
+        <hr />
+        <ul>
+            <li v-for="item in reversehistory">{{item.fid}} - {{item.fname}} </li>
+        </ul>
+    </div>
+
+    <div class="shoppingcar">
+        <div class="carbag" id="carbag" :class="{isShow:isHide==true, isHide:isHide==false}">
+            <p>购物车<span id="del" @click="clearAll()">[清空]</span></p>
+            <table id="bagcontent" cellpadding="0" cellspacing="0">
+                <tr v-for="cartfood in  cartfoods">
+                    <td class="bagfname">{{cartfood.food.fname}}</td>
+                    <td class="bagnum">
+                        <button @click="addCart(cartfood.food.fid,-1)">-</button>
+                        {{cartfood.num}}
+                        <button @click="addCart(cartfood.food.fid,1)">+</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="carprice" @click="showCart()">￥{{cartprice}}</div>
+        <div class="carinfo" v-if="cartfoods.length<=0">购物车是空的</div>
+        <div class="carinfo" v-else @click="orderflag=!orderflag">立即下单</div>
+    </div>
+
+    <div class="footer">
+        Copyright © 2016 Xiaomengsheng Incorporated Company. All rights reserved.
+        <br />
+        订餐，就上小萌神订餐网!
+    </div>
+
+    <!--登录信息 -->
+    <div class="login" id="login" v-if="loginflag">
+        <span id="unshow" @click="loginflag=false">X</span>
+        <form name="myform">
+            <table>
+                <tr>
+                    <td class="labname"><label for="username">用户名：</label></td>
+                    <td><input type="text" name="username" placeholder="请输入用户名"
+                               id="username" v-model="username"/></td>
+                </tr>
+                <tr>
+                    <td class="labname"><label for="pwd">密码：</label></td>
+                    <td><input type="password" name="pwd" placeholder="请输入密码"
+                               id="pwd" v-model="pwd" /></td>
+                </tr>
+                <tr>
+                    <td class="labname"><label for="yzm">验证码：</label></td>
+                    <td><input type="text" name="yzm" placeholder="请输入验证码"
+                               id="yzm" v-model="valcode" /></td>
+                    <td><img src="http://localhost:20001/ressecurity/code.action" id="yzm_img" /></td>
+                </tr>
+            </table>
+        </form>
+        <input type="button" value="login" class="btn" id="btn" @click="login()" />
+    </div>
+
+    <!-- 订单信息 -->
+    <div class="login" id="myinfo" v-if="orderflag">
+        <span id="unshowinfo" @click="orderflag=!orderflag" >X</span>
+        <form name="forminfo">
+            <table>
+                <tr>
+                    <td class="labname"><label for="address">送货地址:</label></td>
+                    <td><input name="address"  type="text" placeholder="请输入送货地址" id="address" v-model="orderInfo.address" /></td>
+                </tr>
+                <tr>
+                    <td class="labname"><label for="tel">联系电话:</label></td>
+                    <td><input type="text"  id="tel" placeholder="请输入联系电话" name="tel" v-model="orderInfo.tel" /></td>
+                </tr>
+                <tr>
+                    <td class="labname"><label for="deliverytime">送货时间:</label></td>
+                    <td><input type="text"  name="deliverytime" id="deliverytime" placeholder="请输入送货时间（默认马上发货）" v-model="orderInfo.deliverytime" /></td>
+                </tr>
+                <tr>
+                    <td class="labname"><label for="ps">附言:</label></td>
+                    <td><input type="text" id="ps" placeholder="请输入附言" name="ps" v-model="orderInfo.ps" /></td>
+                </tr>
+            </table>
+        </form>
+        <input type="button" value="提交" class="btn"  id="submit" @click="confirmOrder()">
+    </div>
+
+</div>
+
+
+<script src="js/vue.js"></script>
+<script src="js/axios.js"></script>
+<script type="text/javascript">
+    //使用axios
+    Vue.prototype.axios = axios;
+    // 在每次请求时，前端携带token到请求头中
+    axios.interceptors.request.use(config => {
+        // 从localStorage或vuex中获取token
+        const token = localStorage.getItem('token') ;   //|| this.$store.state.token;
+        // 如果有token，就添加到请求头中
+        if (token) {
+            config.headers.token = token;
+        }else{
+            config.headers.token ='';
+        }
+        console.log(   token );
+        console.log(   config );
+        return config;
+    }, error => {
+        return Promise.reject(error);
+    });
+
+    var addr_resfood="http://localhost:20001/resfood/";
+    var addr_ressecurity="http://localhost:20001/ressecurity/";
+    var addr_resorder="http://localhost:20001/resorder/";
+    let vm=new Vue({
+        el:"#app",
+        // model
+        data:{
+            orderflag:false,     //送货地址div
+            loginflag:false,      //登录窗口
+
+            isLogin:false,     //记录当前用户登录状态
+
+            //登录时用的参数
+            username:'',
+            pwd:'a',
+            valcode:'',
+
+            data:[],   //显示菜品列表
+            cartfoods:[], //购物车中的商品列表
+            cartprice:0.0,  //总价
+
+            history:[],   //历史浏览记录
+
+            isHide: false,
+
+            historyflag:false,   //历史记录显示div
+
+            //订单的model数据包装成一个对象
+            orderInfo:{
+                address:'湖南',
+                tel:'12345',
+                deliverytime:'2022-10-13',
+                ps:'快快'
+            },
+
+            pagebean:{
+                pageno:1,
+                pagesize:5,
+                sortby:'fid',
+                sort:'asc',
+
+                total:0,
+                totalpages:0,
+                pre:1,
+                next:1
+           }
+        },
+        methods:{
+            //点赞   fid:待操作的  菜品编号    index是界面上的data数组中元素的下标.
+            clickPraise:function(fid,index){
+                var params=new URLSearchParams();
+                params.append("op","clickPraise");
+                params.append("fid",fid);
+                axios.post("resfood.action",params).then( result=>{
+                   var jsonModel=result.data;
+                   if(jsonModel.code==1){
+                       //这样操作不行.
+                       //this.data[index].praise=jsonModel.data.praise;   //这个是新的点赞数
+                       var d=this.data[index];
+                       //                data:这道 菜的全部信息
+                       d.praise=jsonModel.data.praise;
+                       // 利用数组提供 响应式的方法来实现数据的更新
+                       //     将data中下标为  index位置元素，从这个元素向后替换1个元素， 用 d来替换.
+                       this.data.splice(  index,1,  d  );
+                   }
+                });
+            },
+
+            confirmOrder:function(){
+                var params=new URLSearchParams(  this.orderInfo );
+                axios.post(  addr_resorder+"order/orderFood",params).then(  result=>{
+                        if( result.data.code==1){
+                            alert("下订成功");
+                            this.cartfoods=[];
+                            this.cartprice=0;
+                            this.isHide=false;
+                            this.orderflag=false;
+                        }
+                });
+            },
+            clearAll:function(){
+                axios.post(addr_resorder+ "cart/clearAll").then(  result=>{
+                    if(   result.data.code==1 ){
+                        this.cartfoods=[];
+                        this.cartprice=0;
+                        isHide=false;
+                    }
+                });
+            },
+            showCart:function( ){
+               this.isHide=!this.isHide;
+            },
+            addCart:function( fid, num){
+                //要添加购物车的话，先保证登录过
+                if( this.username==null||this.username=='' ){
+                    alert("请登录");
+                    return;
+                }
+                //发出请求服务器
+                var params=new URLSearchParams( );
+                params.append("num",num);
+                params.append( "fid",fid);
+                axios.post(   addr_resorder+ "cart/addCart", params ).then( data=>{
+                    var jsonModel=data.data;
+                    if( jsonModel.code==-1){
+                        alert("请登录");
+                        return;
+                    }else if( jsonModel.code==0){
+                        alert("添加购物车失败");
+                        return;
+                    }else{
+                        //TODO: 成功后显示 购物车数据》
+                        // jsonModel.data 中是数组
+                        this.showCartInfo(  jsonModel.data );
+                    }
+                });
+            },
+            showCartInfo:function( cart ){
+                this.cartfoods=cart;　　//这里的 cartfoods要求一定要是一个  数组,
+                //计算总价
+                this.cartprice=0.0;
+                this.cartfoods.forEach(    (item,index)=>{
+                   this.cartprice +=item.smallCount;
+                });
+
+            },
+            showFood:function(  fid  ){
+                this.data.forEach(   (item,index)=>{
+                    //当前循环的item的fid是否是我点的这个fid
+                    // if(  fid== item.fid){
+                    //     item.status=true;
+                    // }
+                    item.status=   fid==item.fid;
+                });
+                //TODO: 数据埋点
+                // axios.post( "resfood.action?op=traceBrowseFood&fid="+fid   ).then(  data=>{
+                //     var result=data.data;
+                //     if( result.code==1 ){
+                //
+                //     }
+                // });
+            },
+            logout:function(){
+                axios.post( addr_ressecurity+"logout").then(   data=>{
+                    var result=data.data;
+                    if( result.code==1 ){
+                        this.username='';
+                        this.pwd='';
+                        this.isLogin=false;
+                        this.history=[];
+                        this.cartfoods=[];
+                        this.cartprice=0;
+
+                        localStorage.removeItem(  "token"  );
+                    }
+                });
+            },
+            login:function(){
+                var params=new URLSearchParams(    );
+                params.append("username",   this.username );
+                params.append( "pwd",this.pwd);
+                params.append("valcode",this.valcode);
+                //post的结果 是一个Promise对象
+                axios.post(   addr_ressecurity+"resuser.action" , params  ).then(  data=>{
+                    var result=data.data;
+                    if( result.code==0 ){
+                        alert("登录失败,原因:"+result.msg);
+                        return ;
+                    }
+                    this.username=  result.data.username;
+                    this.loginflag=false;
+                    this.isLogin=true;
+
+                    localStorage.setItem('token', result.data.token);  //TODO:.....
+                });
+            },
+            checkLogin:function(){
+                // get的结果是一个Promise对象
+               return axios.get(addr_ressecurity+"checkLogin.action")
+                //axios.get("resuser.action?op=checkLogin").then(data=>{});
+            },
+            findAllFoods:function(){
+                //get()的返回值为Promise对象
+                return axios.get(   "resfood.action?op=findAllFoods");
+            },
+            showCartInit:function(){
+                var params=new URLSearchParams( );
+
+                //在这个方法中 自己在then()中来完成promise对象的处理
+                axios.post(  addr_resorder+ "cart/getCartInfo",params).then(  result=>{
+                    if(  result.data.code==1){
+                        this.showCartInfo(   result.data.data   );
+                    }
+                });
+            },
+
+            clickPage:function(   pageno ){
+                var promise= this.showPage(  pageno );
+                promise.then(    result=>{
+                    this.displayPage(    result.data );
+                });
+            },
+
+            showPage:function(   pageno ){   //在 mounted中调用的，返回一个promise对象
+                var params=new URLSearchParams(   );
+                params.append("pageno",pageno);
+                params.append("pagesize",this.pagebean.pagesize)
+                params.append("sortby",this.pagebean.sortby);
+                params.append("sort",this.pagebean.sort );
+                //返回一个Promise
+                //return axios.post(  "resfood.action?op=findFoodsByPage",     params);
+                return axios.post(  addr_resfood+"findByPage",     params);
+
+            },
+            // result的格式: jsonmodel(   code, data:{  pageno:x, pagesize:x, dataset:[{菜品对象+status,菜品对象}]    }
+            displayPage:function(   result  ){    //以上两个操作 都会有一个json的结果，都交给displayPage方法来做显示
+                let jsonModel2=result;
+                if(   jsonModel2.code==1){
+                    //显示数据到界面.
+                    //绑定到model中
+                    jsonModel2.data.dataset.forEach(   (item,index)=>{
+                        item.status=false;  //给每个菜品对象添加一个属性  status，用于控制 这个菜品详情的显示与隐藏
+                    });
+                    vm.$data.data=jsonModel2.data.dataset;   //菜品列表数据
+                    vm.$data.pagebean=jsonModel2.data;
+                }
+            },
+            //获取历史记录
+            getHistory:function(  ){
+                axios.post(  "resfood.action?op=getHistory").then(    result=>{
+                    var resultData= result.data;
+                    this.history=[];
+                    if( resultData.code==1){
+                        this.history=resultData.data;
+                    }
+                });
+            }
+
+        },
+        computed:{   //引入计算属性，将历史记录倒序输出
+            reversehistory(){
+                return this.history.reverse();
+            }
+        },
+
+        mounted:function(){
+            axios.all(   [ this.checkLogin(), this.showPage(   1  ),this.showCartInit() ]    ).then(  axios.spread(   function(d1,  d2 ){
+                let jsonmodel1=d1.data;
+                if(   jsonmodel1.code==1){
+                    vm.$data.username=jsonmodel1.data.username;
+                    vm.$data.loginflag=false;
+                    vm.$data.isLogin=true;
+                }
+
+                let jsonModel2=d2.data;   //   data中就是后台  返回 jsonmodel(   code, data:{  pageno:x, pagesize:x, dataset:[{菜品对象+status,菜品对象}]    }  )
+                if(   jsonModel2.code==1){
+                    vm.displayPage(   jsonModel2  );
+                }
+            }));
+            // axios.all(   [ this.checkLogin(),this.showPage(   1  ),this.showCartInit(),this.getHistory() ]    ).then(  axios.spread(   function( d1,d2 ){
+            //     let jsonmodel1=d1.data;
+            //     if(   jsonmodel1.code==1){
+            //        vm.$data.username=jsonmodel1.data.username;
+            //        vm.$data.loginflag=false;
+            //        vm.$data.isLogin=true;
+            //     }
+            //
+            //     let jsonModel2=d2.data;   //   data中就是后台  返回 jsonmodel(   code, data:{  pageno:x, pagesize:x, dataset:[{菜品对象+status,菜品对象}]    }  )
+            //     if(   jsonModel2.code==1){
+            //         vm.displayPage(   jsonModel2  );
+            //     }
+            // }));
+        },
+        // created(){
+        //     this.pagebean.sortby="realprice";
+        //     this.pagebean.sort="asc";
+        // }
+        // beforeCreate:function(){
+        //     alert("vue的beforeCreate挂载点.");
+        // }
+    });
+</script>
+
+</body>
+</html>

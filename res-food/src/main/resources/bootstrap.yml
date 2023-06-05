@@ -1,0 +1,22 @@
+#系统级别的配置文件，在容器启动时读取， 优先级最高
+spring:
+  cloud:
+    nacos:
+      config: #配置服务
+        namespace: yc119_prod
+        server-addr: localhost:8848
+        username: nacos
+        password: nacos
+        #maven依赖坐标:groupid - artifactid -版本号
+        #namespace - group - 文件
+        group: DEFAULT_GROUP
+        prefix: res-food   #res-foods-test.yml:这就是 nacos中的dataid
+        file-extension: yml
+        shared-configs:
+          - {dataId: mysql.yml,refresh: true}
+
+  profiles:
+    active: prod
+
+  application:
+    name: res-food

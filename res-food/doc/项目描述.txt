@@ -1,0 +1,114 @@
+1. 本项目为一个小型的订餐小程序,技术如下:
+     前端: html,css,vue+axos,利用了  Vue的 MVVM的特点完成数据渲染.
+     后端: jdbc+servlet,基于MVC架构完成
+     数据库: mysql
+     开发工具:  eclipse/IDEA
+
+ 2. 功能:
+     登录,浏览商品，加入购物车,修改下订数量,修改外卖信息，退出等功能.
+
+ 3. 数据库配置文件
+    ，db.properties
+     请在这个文件中修改数据库联接信息.
+
+ 4. 请提前准备以下知识:
+     vue:  指令: v-if   v-for
+          事件:  @click  v-on:click
+           axos中的  get, post请求方式
+
+     vue的生命周期回调.
+     URLSearchParams 对象封装请求参数
+
+
+５. CommonServlet类
+   a.   HttpServletRequest对象 参数转为 ->  T对象
+                                      技术:反射+泛型
+６. jdbc查询
+      Map<String,Object>   ->   T
+                           技术：       反射+泛型
+
+
+７．　Servlet的生命周期
+    service(){
+          请求转发.       op的值 与 当前servlet中的一个方法名    利用反射
+   }
+
+
+后期项目升级的功能:
+a. 分页的实现                                                                            ok
+b. 用户的历史访问记录  , 商品的赞的实现
+    用户的历史访问记录  ok:
+     1） ****登录用户的历史访问记录： 只要查看菜的详情.  只保存最近的4条数据.
+      下单的数据:  mysql库
+      加购物车的数据:
+     2） 数据埋点: 前端
+     3)后台servlet中的开发，访问redis,存键值对的数据结构 :   userid+_visited     SortSet<菜品编号>
+     4)在前端界面上完成历史记录显示的功能，  将访问的历史记录显示到一个div中.
+          vue: 计算属性   数组倒序
+          权限过滤:  逻辑  -> 有的action中有多个方法，有些要权限 ，有些不需要》
+          redis相关操作:
+             sorted set数据结构:
+             zcard
+             zremrangeByRank
+            zadd
+            expire
+             zrevrange
+          mysql中拼接  in语句,
+
+    商品的赞的实现:
+        需求: 登录用户才能赞, 一个用户对一个商品只能赞一次，也可以取消赞.     ok
+           redis中的存储结构:
+                      1) 菜品号_praise   Set<用户编号>
+                         用户编号_praise Set<菜品号>
+                         用户编号_collection Set<菜品号>
+
+
+
+c. 用户权限的统一处理                                 Filter实现                            ok
+d. 如何记录服务器启动信息到数据库，以便于网站管理员追踪.    Listener实现.                         ok
+
+e. 如何记录登录客户们使用了何种设备访问网站.                 Filter+redis实现                ok
+       1)判断用什么存储方式? sql库 /  no-sql库-> redis/mongo/hadoop/hbase/....
+       2)redis ->  键的设计  +  值类型
+                  safari       Set<用户id>
+                  chrome
+                  ie
+                  firefox
+
+                 用户id_device   List<设备名>
+       3)写在Filter中比servlet中好.
+             过滤地址的区别:    *    or  *.action  or   /index.html
+
+
+
+
+
+f. 谁是本网站的深度使用用户( 连续三天都登录了网站的用户   )    Filter+redis+算法+空间复杂度方案   实现
+     1)增加一个过滤器  拦截   /resuser.action   判断op=login,  只针对响应做处理.
+     2) 记录到redis中. 以实现  连续七天都登录了网站的用户
+       setbit  key offset value
+       setbit( "0", 1, 1)
+       setbit( "0",2, 1)
+       setbit( "0", 3, 1)
+       setbit("0",8, 1)
+       以位图来实现
+         键           值 (String)
+         0    10000111
+         1    10000011
+         2    10000001
+     3) 后台： 取出当前系统的活活跃用户.
+         按位与     jedis.bitop(   BitOP.AND,   "0","1","2"  )  =>   10000001
+
+
+
+
+
+
+
+g. 如何将网站上线到阿里云,并实现监控.
+
+提前工作:
+1. 复习一期项目中的oracle分页功能的实现，查找资料学习mysql的分页实现,
+2. 预习redis的安装和redis中的数据类型
+3. j2ee的filter, listener的使用  ok
+4. 阿里云中安装与配置 redis.

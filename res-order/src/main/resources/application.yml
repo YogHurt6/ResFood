@@ -1,0 +1,75 @@
+spring:
+  cloud:
+    sentinel:  #sentinel配置
+      transport:
+        port: 8719
+        dashboard: localhost:8888
+      eager: true
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        username: nacos
+        password: nacos
+  sleuth:
+    web:
+      client:
+        #开启采集链路
+        enabled: true
+    sampler:
+      #默认采集是0.1(百分之十),生产环境采用默认，测试环境可以修改为1.0
+      probability: 1.0
+  zipkin:
+    base-url: http://localhost:9411/
+  redis:
+    host: localhost
+    port: 6379
+    database: 2
+  application:
+    name: res-order
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/yc119res?serverTimeZone=UTC
+    #使用druid数据源
+    type: com.alibaba.druid.pool.DruidDataSource
+server:
+  port: ${port:8001}
+
+logging:
+  level:
+    root: info
+    com.yc: info
+    org.springframework: info
+    com.yc.api.ResfoodApi: DEBUG
+    #针对一个客户端
+  file:
+    path: ./logs
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  #打印mybatis-plus的sql语句
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: ""
+feign:
+  compression:
+    request:
+      enabled: true
+      min-request-size: 2048  #超过2048字节进行压缩
+      mime-types: #可以被压缩的类型
+        - text/xml
+        - application/xml
+        - application/json
+    response:
+      enabled: true
+
+#  client:
+#    config:
+#      default:
+#        connectTimeout: 3000
+#        readTimeout: 3000
